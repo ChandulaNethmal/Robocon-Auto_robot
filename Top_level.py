@@ -13,11 +13,8 @@ checkpoint4=23
 restart_button=24
 
 ##Assign Variables
-#count_line2
 count_line2=0
-#count_line3
 count_line3=0
-#global restart
 restart=False
 
 # Pin Setup:
@@ -48,7 +45,7 @@ GPIO.add_event_detect(restart_button, GPIO.FALLING, callback=restart_func, bounc
 #####
 
 def start_trans(txt):     # wait_idle for restart button event
-        
+    print("start_trans")      
     cp1= GPIO.input(checkpoint1)
     cp2= GPIO.input(checkpoint2)
     cp3= GPIO.input(checkpoint3)
@@ -69,7 +66,8 @@ def start_trans(txt):     # wait_idle for restart button event
 
 
 def message_detected_trans(txt):      # Readig message detector
-
+    global restart
+    print("message_detected_trans") 
     Message= GPIO.input(Message_detector_pin)
     if restart==True:
         newState = "start_trans"
@@ -88,7 +86,8 @@ def walking_in_gobi_trans(txt):      # Moving forward while line following and d
 
     #According to line follwing code send Serial data to Teensy
     ###start searching line2
-
+    global restart
+    print("walking gobi")
     if restart==True:
         newState = "start_trans"
         restart=False
@@ -99,6 +98,8 @@ def walking_in_gobi_trans(txt):      # Moving forward while line following and d
     return (newState, txt)
 
 def line2_checkpoint_trans(txt):      # Restarting checkpoint_1_reached 
+    global restart,count_line2
+    print("line2_detected")
     if count_line2 == 0:
         ##turn 45 degree
         count_line2 =count_line2+1
@@ -121,7 +122,8 @@ def line2_checkpoint_trans(txt):      # Restarting checkpoint_1_reached
     return (newState, txt)
 
 def sand_dune_detected_trans(txt):    # Depth cam detected sand_dune and proceed climb
-        
+    global restart
+    print("sand dune")     
     #send Serial data to Teensy to climb sand dune
     ##start searching line3
     if restart==True:
@@ -135,6 +137,8 @@ def sand_dune_detected_trans(txt):    # Depth cam detected sand_dune and proceed
 
 def line3_checkpoint_trans(txt):      # Restarting checkpoint_2_reached 
 
+    print("line3_checkpoint")
+    global restart,count_line3
     if count_line3 == 0:
         ##turn 45 degree
         count_line3 = count_line3 +1
@@ -153,6 +157,8 @@ def line3_checkpoint_trans(txt):      # Restarting checkpoint_2_reached
 
 def mountain_urtu_trans(txt):         # Manually stoping and Restarting checkpoint_3_reached 
 
+    global restart
+    print("mountain urtu")
     ##Seding serial string to stop robot
    
     start_climb= GPIO.input(climb_starter_pin)   #start reading proximity sensor
@@ -169,24 +175,33 @@ def mountain_urtu_trans(txt):         # Manually stoping and Restarting checkpoi
 
 def mountain_climb_trans(txt):  #Read proximity input and start climbing
 
+    global restart
+    print("climbing_the mountain")
     #Isuue line_following commands via serial to teensy
     #Run color detection script to find blue color(top)
     
     if restart==True:
         newState = "start_trans"
         restart=False
-    elif top_deteted_==True:
+    elif top_detected_==True:
         newState = "reached_top"
     else :
         newState = "mountain_climb"    
     return (newState, txt)    
 
 def reached_top_trans(txt):           #Detect blue color and stop robot at the top of moutain
-    
+
+    global restart
+    print("####### raising the message######")
     #Stop the robot and lift the message
     # issue command to arm for lift message
     
-    return (txt)
+    return ("Completed_task")
+
+def completed_state():
+    global restart
+    print("####$$$$*****completed task*****####")
+    return()
 
 
 if __name__== "__main__":
@@ -206,4 +221,4 @@ if __name__== "__main__":
 
     m.set_start("Start")
 
-    m.run("Python is great")
+    m.run("Starting the robot")
